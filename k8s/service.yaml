@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sql-generator-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: sql-generator
+  ports:
+  - port: 80
+    targetPort: 8000

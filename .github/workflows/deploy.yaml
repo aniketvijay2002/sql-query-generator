@@ -1,0 +1,52 @@
+name: CI-CD-EKS
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  AWS_REGION: ap-south-1
+  EKS_CLUSTER: sql-generator-cluster
+  ECR_REPO: sql-query-generator
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1️⃣ Checkout code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2️⃣ Configure AWS credentials
+    - name: Configure AWS
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    # 3️⃣ Login to Amazon ECR
+    - name: Login to ECR
+      id: ecr
+      uses: aws-actions/amazon-ecr-login@v2
+
+    # 4️⃣ Build & push Docker image
+    - name: Build & Push Image
+      run: |
+        docker build -t ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }} backend
+        docker push ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+        echo "IMAGE=${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}" >> $GITHUB_ENV
+
+    # 5️⃣ Connect to EKS
+    - name: Update kubeconfig
+      run: |
+        aws eks update-kubeconfig \
+        --name $EKS_CLUSTER \
+        --region $AWS_REGION
+
+    # 6️⃣ Deploy to EKS
+    - name: Deploy
+      run: |
+        sed -i "s|IMAGE_PLACEHOLDER|$IMAGE|g" k8s/deployment.yaml
+        kubectl apply -f k8s/
