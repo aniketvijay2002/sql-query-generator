@@ -3,78 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI SQL Generator</title>
+  <title>SQL Query Generator</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
   <style>
     body { font-family: 'Inter', sans-serif; }
   </style>
 </head>
 
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<body class="bg-gray-100 min-h-screen">
 
-  <div class="max-w-3xl mx-auto pt-20 pb-10 px-6">
+  <div class="max-w-4xl mx-auto pt-16 pb-10 px-6">
 
-    <div class="backdrop-blur-xl bg-white/70 rounded-3xl shadow-2xl p-10 border border-white/40">
+    <div class="bg-white rounded-lg shadow-md p-8 border">
 
-      <h1 class="text-4xl font-bold text-center text-indigo-700 mb-6">
-        ⚡ AI SQL Query Generator
+      <h1 class="text-2xl font-semibold text-gray-800 mb-2">
+        SQL Query Generator
       </h1>
 
-      <p class="text-lg text-gray-800 text-center mb-10">
-        Convert natural language → SQL + Sample Result
+      <p class="text-gray-600 mb-8">
+        Generate SQL queries from natural language input
       </p>
 
-      <textarea id="input"
-        class="w-full h-32 p-5 text-xl border-2 border-indigo-300 rounded-2xl focus:ring-4 focus:ring-indigo-400 outline-none transition-all"
-        placeholder="Write your question here... (e.g., show all students in Pune)">
-      </textarea>
+      <label class="block text-sm font-medium text-gray-700 mb-2">
+        Input Requirement
+      </label>
 
-      <button onclick="generate()"
-        class="w-full mt-6 py-4 text-xl bg-indigo-600 text-white rounded-2xl font-semibold hover:bg-indigo-700 transition-all shadow-lg hover:shadow-xl">
-        🚀 Generate SQL
+      <textarea
+        id="input"
+        class="w-full h-32 p-4 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none"
+        placeholder="Example: fetch all students from Pune"
+      ></textarea>
+
+      <button
+        onclick="generate()"
+        class="mt-4 px-6 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700">
+        Generate
       </button>
 
-      <div class="mt-10">
+      <div class="mt-8">
 
-        <h2 class="text-3xl font-bold text-indigo-800 mb-3">🧠 Generated SQL Query</h2>
-        <pre id="sql"
-             class="bg-gray-900 text-green-400 p-6 rounded-2xl text-lg overflow-auto shadow-inner min-h-[120px]">
-        </pre>
+        <h2 class="text-lg font-semibold text-gray-800 mb-2">
+          Generated SQL
+        </h2>
 
-        <h2 class="text-3xl font-bold text-indigo-800 mt-10 mb-3">📊 Sample Output Result</h2>
-        <pre id="result"
-             class="bg-gray-900 text-blue-300 p-6 rounded-2xl text-lg overflow-auto shadow-inner min-h-[150px]">
-        </pre>
+        <pre
+          id="sql"
+          class="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-auto min-h-[100px]"
+        ></pre>
+
+        <h2 class="text-lg font-semibold text-gray-800 mt-6 mb-2">
+          Sample Result
+        </h2>
+
+        <pre
+          id="result"
+          class="bg-gray-900 text-gray-100 p-4 rounded-md text-sm overflow-auto min-h-[120px]"
+        ></pre>
 
       </div>
 
     </div>
   </div>
 
-
   <script>
-  async function generate() {
-    const question = document.getElementById("input").value;
+    async function generate() {
+      const question = document.getElementById("input").value;
 
-    document.getElementById("sql").innerText = "⏳ Generating...";
-    document.getElementById("result").innerText = "⏳ Generating...";
+      document.getElementById("sql").innerText = "Processing request...";
+      document.getElementById("result").innerText = "Processing request...";
 
-    const response = await fetch("/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question })
-    });
+      try {
+        const response = await fetch("/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question })
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    document.getElementById("sql").innerText = data.sql;
-    document.getElementById("result").innerText = data.result;
-  }
-</script>
+        document.getElementById("sql").innerText = data.sql || "No SQL generated";
+        document.getElementById("result").innerText = data.result || "No result available";
 
+      } catch (err) {
+        document.getElementById("sql").innerText = "Request failed";
+        document.getElementById("result").innerText = "";
+      }
+    }
+  </script>
 
 </body>
 </html>
