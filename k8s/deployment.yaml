@@ -22,7 +22,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: llm-secret
-              key: groq_key
+              key: GROQ_API_KEY
         resources:
           requests:
             cpu: "100m"
