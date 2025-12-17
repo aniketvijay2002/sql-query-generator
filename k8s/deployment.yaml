@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: sql-generator
 spec:
-  replicas: 1
+  replicas: 1   # MUST be 1 on t3.micro
   selector:
     matchLabels:
       app: sql-generator
@@ -23,3 +23,10 @@ spec:
             secretKeyRef:
               name: llm-secret
               key: groq_key
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
